@@ -6,7 +6,7 @@
   "description": "Sistema de agendamentos para barbearias usado como projeto de portfolio.",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node versionamento/versionador.js",
+    "build": "echo \"VITE_SUPABASE_URL: $VITE_SUPABASE_URL\" && echo \"VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY\" && vite build && node versionamento/versionador.js",
     "preview": "vite preview",
     "test": "vitest run"
   },
