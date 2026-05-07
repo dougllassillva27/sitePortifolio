@@ -1,59 +1,58 @@
-# BarberFlow — Checklist de Testes
+# BarberFlow Neon — Checklist de Testes
 
 ## Comandos obrigatórios
+
+Raiz:
 
 ```bash
 npm run test
 npm run build
 ```
 
-## Testes manuais públicos
+Backend:
+
+```bash
+cd backend
+pytest
+python scripts/aplicar_migracoes.py
+```
+
+## Testes manuais
+
+### Frontend
 
 - [ ] Página inicial abre.
-- [ ] Botão de agendamento funciona.
-- [ ] Cliente escolhe barbeiro.
-- [ ] Cliente escolhe serviço.
-- [ ] Cliente escolhe data.
-- [ ] Cliente escolhe horário.
-- [ ] Nome obrigatório é validado.
-- [ ] Telefone obrigatório é validado.
-- [ ] E-mail é opcional.
-- [ ] Agendamento é criado como pendente.
+- [ ] Serviços aparecem.
+- [ ] Barbeiros aparecem.
+- [ ] Formulário valida nome.
+- [ ] Formulário valida telefone.
+- [ ] Formulário carrega horários.
+- [ ] Agendamento é enviado.
 - [ ] Link WhatsApp é gerado.
 
-## Testes manuais admin
+### Backend
 
-- [ ] Login admin abre.
-- [ ] Painel admin abre.
-- [ ] Lista de agendamentos aparece.
-- [ ] Admin aceita agendamento.
-- [ ] Admin cancela agendamento.
-- [ ] Admin conclui agendamento.
-- [ ] Admin cria encaixe.
-- [ ] Admin visualiza status.
+- [ ] `/saude` responde.
+- [ ] `/api/barbeiros` responde.
+- [ ] `/api/servicos` responde.
+- [ ] `/api/disponibilidade` responde.
+- [ ] `POST /api/agendamentos` cria pendente.
+- [ ] Admin lista agendamentos com token.
+- [ ] Admin confirma agendamento.
+- [ ] Cliente cancela com token.
+- [ ] Cliente remarca com token.
+- [ ] Backup exige admin token.
 
-## Testes de regra
+### Banco
 
-- [ ] Serviço de 30 minutos bloqueia 30 minutos.
-- [ ] Serviço de 50 minutos bloqueia 50 minutos.
-- [ ] Horário ocupado não aparece como livre.
-- [ ] Dia bloqueado não permite agendamento.
-- [ ] Token inválido não cancela.
-- [ ] Token válido cancela apenas o agendamento correto.
-- [ ] Remarcação respeita disponibilidade.
+- [ ] Tabelas criadas.
+- [ ] Dados iniciais inseridos.
+- [ ] Agendamento referencia cliente, serviço e barbeiro.
+- [ ] Bloqueio impede disponibilidade.
+- [ ] Status inválido é recusado.
 
-## Testes Google Calendar
+### Google Calendar
 
-- [ ] Evento é criado ao aceitar.
-- [ ] google_event_id é salvo.
-- [ ] Cliente com e-mail entra como convidado.
-- [ ] Cliente sem e-mail não bloqueia criação.
-- [ ] Falha no Google não confirma silenciosamente.
-
-## Testes UI/A11Y
-
-- [ ] Layout sem scroll horizontal em 375px.
-- [ ] Botões possuem foco visível.
-- [ ] Inputs possuem label.
-- [ ] Contraste confortável.
-- [ ] Navegação por teclado funcional.
+- [ ] Sem credenciais: modo simulado funciona.
+- [ ] Com credenciais: evento real é criado.
+- [ ] E-mail opcional do cliente entra como attendee.

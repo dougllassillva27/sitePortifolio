@@ -1,124 +1,115 @@
-# BarberFlow — Arquitetura
+# BarberFlow Neon — Arquitetura
 
 ## Stack
 
 Frontend:
-- React
-- Vite
-- TypeScript
-- Tailwind CSS
+
+- HTML.
+- CSS.
+- JavaScript puro.
+
+Backend:
+
+- Python.
+- FastAPI.
+- Psycopg 3.
+- Uvicorn.
+
+Banco:
+
+- Neon Postgres.
 
 Hospedagem:
-- Netlify
 
-Banco, auth e funções:
-- Supabase Postgres
-- Supabase Auth
-- Supabase RLS
-- Supabase Realtime
-- Supabase Edge Functions
+- Netlify para frontend.
+- Render para backend Python.
 
 Agenda:
-- Google Calendar API
+
+- Google Calendar API no backend.
+- Modo simulado quando credenciais não existem.
 
 WhatsApp:
-- Link manual pré-preenchido no MVP.
 
-## Camadas
+- Link manual pré-preenchido.
 
-### Frontend
+## Motivo da arquitetura
 
-Responsável por:
-- landing page;
-- fluxo público de agendamento;
-- cancelamento por token;
-- remarcação por token;
-- login admin;
-- painel admin;
-- geração de links WhatsApp;
-- consumo das edge functions.
+Neon é um banco PostgreSQL. A string de conexão é segredo e não pode ficar no frontend.
 
-### Supabase Database
+Por isso:
 
-Responsável por:
-- barbeiros;
-- serviços;
-- clientes;
-- agendamentos;
-- bloqueios;
-- notificações;
-- backups.
+```text
+frontend -> backend Python -> Neon
+```
 
-### Supabase Auth
+## Variáveis do backend
 
-Responsável por:
-- login do admin único.
+```text
+DATABASE_URL=
+ADMIN_TOKEN=
+ORIGENS_CORS=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REFRESH_TOKEN=
+GOOGLE_CALENDAR_ID=
+```
 
-### Supabase RLS
+## Variáveis do frontend
 
-Responsável por:
-- impedir leitura pública indevida;
-- permitir criação pública controlada;
-- liberar operação administrativa apenas para usuário autenticado.
+O frontend estático usa:
 
-### Supabase Edge Functions
+```text
+window.BARBERFLOW_CONFIG = {
+  API_BASE_URL: "http://localhost:8000"
+}
+```
 
-Responsáveis por:
-- verificar disponibilidade;
-- aceitar agendamento;
-- criar evento Google;
-- cancelar agendamento;
-- remarcar agendamento;
-- executar backup.
+Em produção, editar `frontend/config.js` para apontar para a URL do Render.
 
-### Google Calendar
+## Deploy local
 
-Responsável por:
-- receber evento quando admin aceita agendamento;
-- incluir cliente como convidado quando e-mail existir.
+Backend:
 
-## Deploy
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env
+python scripts/aplicar_migracoes.py
+uvicorn app.main:app --reload
+```
 
 Frontend:
-- Netlify
-- comando: npm run build
-- pasta publicada: dist
 
-Banco/funções:
-- Supabase
+```bash
+npm install
+npm run dev
+```
 
-## Variáveis de ambiente
+## Deploy produção
 
 Frontend:
-- VITE_SUPABASE_URL
-- VITE_SUPABASE_ANON_KEY
 
-Edge Functions:
-- GOOGLE_CLIENT_ID
-- GOOGLE_CLIENT_SECRET
-- GOOGLE_REFRESH_TOKEN
-- GOOGLE_CALENDAR_ID
-- SUPABASE_SERVICE_ROLE_KEY
+- Netlify.
+- Comando: `npm run build`.
+- Pasta: `dist`.
 
-## Versionamento de assets
+Backend:
 
-O build deve usar:
+- Render Web Service.
+- Build: `pip install -r backend/requirements.txt`.
+- Start: `cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 
-vite build && node versionamento/versionador.js
+Banco:
 
-Não adicionar ?v= manualmente no código.
+- Neon.
+- Aplicar `database/migrations/001_schema_inicial.sql`.
 
-## Backup
+## Segurança
 
-Estratégia inicial:
-- documentar exportação lógica do Supabase;
-- criar função executar-backup como base;
-- manter recuperação documentada.
-
-## Riscos
-
-- Google OAuth exige configuração correta.
-- Convite Google exige e-mail do cliente.
-- WhatsApp automático real exige WhatsApp Business Platform e fica fora do MVP.
-- RLS mal configurada pode expor dados.
-- Conflito de agenda precisa ser revalidado no aceite.
+- `DATABASE_URL` só no backend.
+- `ADMIN_TOKEN` só no backend.
+- Frontend nunca conecta direto no Neon.
+- CORS configurável por `ORIGENS_CORS`.

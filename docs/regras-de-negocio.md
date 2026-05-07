@@ -1,112 +1,92 @@
-# BarberFlow — Regras de Negócio
+# BarberFlow Neon — Regras de Negócio
 
 ## Agendamento público
 
 1. Cliente escolhe barbeiro.
 2. Cliente escolhe serviço.
 3. Cliente escolhe data.
-4. Sistema lista horários disponíveis.
+4. Sistema calcula horários disponíveis.
 5. Cliente informa nome, telefone, e-mail opcional e observação opcional.
-6. Sistema cria agendamento com status pendente.
-7. Sistema gera token_cliente para ações futuras do cliente.
-8. Sistema mostra confirmação visual.
-9. Sistema gera link manual de WhatsApp.
+6. Sistema cria cliente.
+7. Sistema cria agendamento com status pendente.
+8. Sistema gera token_cliente.
+9. Sistema retorna links de cancelamento, remarcação e WhatsApp manual.
 
 ## Disponibilidade
 
-Um horário só está disponível quando:
+Um horário está disponível quando:
 
-- está dentro do expediente;
-- não está em feriado;
-- não está em bloqueio manual;
-- não conflita com agendamento confirmado;
-- não conflita com agendamento pendente ainda válido;
-- respeita a duração do serviço escolhido.
+- está dentro do expediente padrão;
+- não está em bloqueio;
+- não cruza com agendamento pendente;
+- não cruza com agendamento confirmado;
+- respeita a duração do serviço.
 
-## Duração dos serviços
+## Expediente MVP
 
-Cada serviço possui duracao_minutos.
+- Segunda a sábado.
+- 09:00 até 18:00.
+- Domingo fechado.
+
+## Duração
+
+Cada serviço usa `duracao_minutos`.
 
 Exemplo:
+
 - Corte: 30 minutos.
 - Barba: 20 minutos.
-- Corte + barba: 50 minutos.
+- Corte + Barba: 50 minutos.
 - Sobrancelha: 15 minutos.
 
-Não existe intervalo extra entre serviços no MVP.
+## Aceite admin
 
-## Aceite pelo admin
+Ao confirmar:
 
-Ao aceitar um agendamento:
+1. API revalida disponibilidade.
+2. API cria evento Google Calendar se credenciais existirem.
+3. Se Google não estiver configurado, API usa modo simulado.
+4. API salva `google_event_id`.
+5. API muda status para confirmado.
+6. API retorna mensagem WhatsApp manual.
 
-1. Revalidar conflito no banco.
-2. Revalidar bloqueio/feriado.
-3. Criar evento no Google Calendar.
-4. Salvar google_event_id.
-5. Alterar status para confirmado.
-6. Gerar link WhatsApp manual de confirmação.
+## Cancelamento cliente
 
-Se o Google Calendar falhar, o sistema não deve confirmar silenciosamente.
+1. Cliente envia token.
+2. API valida token.
+3. API muda status para cancelado_pelo_cliente.
+4. API registra motivo opcional.
 
-## Cancelamento pelo cliente
+## Remarcação cliente
 
-1. Cliente acessa página com token.
-2. Sistema valida token.
-3. Sistema verifica se o agendamento ainda pode ser cancelado.
-4. Sistema muda status para cancelado_pelo_cliente.
-5. Sistema registra motivo, se informado.
+1. Cliente envia token.
+2. Cliente escolhe nova data e horário.
+3. API revalida disponibilidade.
+4. API atualiza início/fim.
+5. API muda status para remarcado.
 
-## Remarcação pelo cliente
+## Admin
 
-1. Cliente acessa página com token.
-2. Sistema valida token.
-3. Cliente escolhe nova data e horário.
-4. Sistema revalida disponibilidade.
-5. Sistema muda status para remarcacao_solicitada ou remarcado.
-6. Admin revisa quando necessário.
+Admin usa `x-admin-token`.
 
-## Encaixe admin
+O token fica no backend em variável:
 
-O encaixe é criado manualmente pelo admin.
+```text
+ADMIN_TOKEN=
+```
 
-Regras:
-- pode ser criado mesmo se não veio do fluxo público;
-- precisa informar cliente, barbeiro, serviço, data e horário;
-- deve respeitar conflitos, salvo override futuro fora do MVP.
+No MVP, o admin digita o token no frontend. O token não fica hardcoded.
 
-## Bloqueios
+## WhatsApp
 
-Tipos de bloqueio:
-- feriado;
-- folga;
-- bloqueio_manual;
-- manutencao;
-- outro.
+Não existe envio automático no MVP.
 
-Bloqueios impedem novos agendamentos no período.
+O sistema gera:
 
-## WhatsApp manual
+```text
+https://wa.me/55TELEFONE?text=MENSAGEM
+```
 
-O MVP não envia mensagens automaticamente.
+## Backup
 
-O sistema apenas gera links no formato:
-
-https://wa.me/55TELEFONE?text=MENSAGEM_CODIFICADA
-
-## Google Calendar
-
-Evento no Google Calendar só é criado quando o admin aceita o agendamento.
-
-Se o cliente informou e-mail:
-- adicionar como attendee.
-
-Se o cliente não informou e-mail:
-- criar evento apenas na agenda da barbearia/teste.
-
-## Segurança
-
-- Cliente não possui login.
-- Cliente usa token_cliente.
-- Admin usa autenticação Supabase.
-- Dados administrativos não podem ser expostos publicamente.
-- RLS deve ficar ativa.
+Endpoint admin retorna dump lógico das tabelas principais em JSON.

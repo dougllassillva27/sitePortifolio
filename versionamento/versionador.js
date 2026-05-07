@@ -1,45 +1,31 @@
-/**
- * ============================================================================
- * 🤖 INSTRUÇÕES OBRIGATÓRIAS PARA IA/IDE (FLUXO DE VERSIONAMENTO VITE + NETLIFY)
- * ============================================================================
- * Este script é o MOTOR DE CACHE BUSTING (Build-Time) padronizado.
- *
- * 1. INFRAESTRUTURA: pasta `versionamento/` na raiz.
- * 2. AUTOMAÇÃO: usar "build": "vite build && node versionamento/versionador.js".
- * 3. CÓDIGO: usar caminhos limpos. Proibido adicionar ?v= manualmente.
- * ============================================================================
- */
-import fs from 'fs';
-import path from 'path';
-import crypto from 'crypto';
-import { fileURLToPath } from 'url';
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
 
-const caminhoArquivoAtual = fileURLToPath(import.meta.url);
-const diretorioAtual = path.dirname(caminhoArquivoAtual);
-const diretorioBase = path.resolve(diretorioAtual, '../dist');
-const diretoriosIgnorados = ['node_modules', '.git'];
-const extensoesAlvo = ['.html', '.css', '.js', '.json', '.svg', '.webmanifest'];
+const diretorioBase = path.resolve("dist");
+const extensoesAlvo = [".html", ".css", ".js", ".json", ".svg"];
 
 function gerarHash(caminhoArquivo) {
   const conteudo = fs.readFileSync(caminhoArquivo);
-  return crypto.createHash('md5').update(conteudo).digest('hex').substring(0, 8);
+  return crypto.createHash("md5").update(conteudo).digest("hex").slice(0, 8);
 }
 
-function processarUrl(url, caminhoArquivoOrigem) {
-  if (!url || url.startsWith('http') || url.startsWith('data:') || url.startsWith('#') || url.startsWith('mailto:') || url.startsWith('tel:')) {
+function processarUrl(url, caminhoArquivoAtual) {
+  if (
+    !url ||
+    url.startsWith("http") ||
+    url.startsWith("data:") ||
+    url.startsWith("#") ||
+    url.startsWith("mailto:") ||
+    url.startsWith("tel:")
+  ) {
     return url;
   }
 
-  const urlSemHash = url.split('#')[0];
-  const urlPura = urlSemHash.split('?')[0];
-
-  let caminhoFisico;
-
-  if (urlPura.startsWith('/')) {
-    caminhoFisico = path.join(diretorioBase, urlPura);
-  } else {
-    caminhoFisico = path.join(path.dirname(caminhoArquivoOrigem), urlPura);
-  }
+  const urlPura = url.split("?")[0].split("#")[0];
+  const caminhoFisico = urlPura.startsWith("/")
+    ? path.join(diretorioBase, urlPura)
+    : path.join(path.dirname(caminhoArquivoAtual), urlPura);
 
   if (!fs.existsSync(caminhoFisico) || !fs.statSync(caminhoFisico).isFile()) {
     return url;
@@ -52,44 +38,30 @@ function processarUrl(url, caminhoArquivoOrigem) {
     return url.replace(regexVersao, `$1v=${hash}`);
   }
 
-  const separador = url.includes('?') ? '&' : '?';
+  const separador = url.includes("?") ? "&" : "?";
 
-  if (url.includes('#')) {
-    return url.replace('#', `${separador}v=${hash}#`);
+  if (url.includes("#")) {
+    return url.replace("#", `${separador}v=${hash}#`);
   }
 
   return `${url}${separador}v=${hash}`;
 }
 
 function processarConteudo(conteudo, caminhoArquivo) {
-  let novoConteudo = conteudo.replace(/((?:['"]?)(?:href|src|content)(?:['"]?)\s*[:=]\s*)(['"])(.*?)\2/gi, (match, prefixo, aspas, url) => {
+  let novoConteudo = conteudo.replace(/((?:href|src)\s*=\s*)(["'])(.*?)\2/gi, (_, prefixo, aspas, url) => {
     return `${prefixo}${aspas}${processarUrl(url, caminhoArquivo)}${aspas}`;
   });
 
-  novoConteudo = novoConteudo.replace(/url\((['"]?)(.*?)\1\)/gi, (match, aspas, url) => {
+  novoConteudo = novoConteudo.replace(/url\((["']?)(.*?)\1\)/gi, (_, aspas, url) => {
     return `url(${aspas}${processarUrl(url, caminhoArquivo)}${aspas})`;
-  });
-
-  novoConteudo = novoConteudo.replace(/srcset=(['"])(.*?)\1/gi, (match, aspas, srcset) => {
-    const novoSrcset = srcset
-      .split(',')
-      .map((parte) => {
-        const [url, descritor] = parte.trim().split(/\s+/);
-        const urlProcessada = processarUrl(url, caminhoArquivo);
-        return descritor ? `${urlProcessada} ${descritor}` : urlProcessada;
-      })
-      .join(', ');
-
-    return `srcset=${aspas}${novoSrcset}${aspas}`;
   });
 
   return novoConteudo;
 }
 
-function varrerDiretorio(diretorio) {
+function varrer(diretorio) {
   if (!fs.existsSync(diretorio)) {
-    console.error(`[ERRO CRÍTICO] O diretório de build (${diretorio}) não existe.`);
-    console.error('Execute "vite build" antes do versionador.');
+    console.error(`Diretório não encontrado: ${diretorio}`);
     process.exit(1);
   }
 
@@ -98,9 +70,7 @@ function varrerDiretorio(diretorio) {
     const estado = fs.statSync(caminhoCompleto);
 
     if (estado.isDirectory()) {
-      if (!diretoriosIgnorados.includes(item)) {
-        varrerDiretorio(caminhoCompleto);
-      }
+      varrer(caminhoCompleto);
       continue;
     }
 
@@ -108,16 +78,16 @@ function varrerDiretorio(diretorio) {
       continue;
     }
 
-    const conteudoOriginal = fs.readFileSync(caminhoCompleto, 'utf-8');
-    const conteudoProcessado = processarConteudo(conteudoOriginal, caminhoCompleto);
+    const original = fs.readFileSync(caminhoCompleto, "utf-8");
+    const processado = processarConteudo(original, caminhoCompleto);
 
-    if (conteudoOriginal !== conteudoProcessado) {
-      fs.writeFileSync(caminhoCompleto, conteudoProcessado, 'utf-8');
-      console.log(`[ATUALIZADO] ${caminhoCompleto.replace(diretorioBase, '')}`);
+    if (original !== processado) {
+      fs.writeFileSync(caminhoCompleto, processado, "utf-8");
+      console.log(`[ATUALIZADO] ${path.relative(diretorioBase, caminhoCompleto)}`);
     }
   }
 }
 
-console.log('Iniciando versionamento de assets estáticos no diretório dist/ ...');
-varrerDiretorio(diretorioBase);
-console.log('Versionamento concluído com sucesso.');
+console.log("Iniciando versionamento de assets...");
+varrer(diretorioBase);
+console.log("Versionamento concluído.");

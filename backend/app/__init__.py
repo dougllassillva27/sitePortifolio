@@ -1,0 +1,1 @@
+"""Aplicação BarberFlow Neon."""

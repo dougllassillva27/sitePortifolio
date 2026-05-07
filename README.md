@@ -1,68 +1,113 @@
-# BarberFlow
+# BarberFlow Neon
 
-Sistema de agendamentos para barbearias usado como projeto de portfólio.
+Sistema de agendamentos para barbearias usando stack simples:
 
-## Stack
-
-- React
-- Vite
-- TypeScript
-- Tailwind CSS
-- Supabase
+- HTML
+- CSS
+- JavaScript
+- Python/FastAPI
+- Neon Postgres
 - Netlify
-- Google Calendar API
+- Render
 
-## Instalação
+## Arquitetura
+
+```text
+Frontend estático -> API Python -> Neon Postgres
+```
+
+A `DATABASE_URL` do Neon fica somente no backend.
+
+## Rodar frontend
 
 ```bash
 npm install
+npm run dev
 ```
 
-## Rodar local
+Abre em:
+
+```text
+http://localhost:4173
+```
+
+## Rodar backend
 
 ```bash
-npm run dev
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env
+```
+
+Edite `backend/.env`:
+
+```text
+DATABASE_URL=sua_url_do_neon
+ADMIN_TOKEN=um-token-forte
+```
+
+Aplicar banco:
+
+```bash
+python scripts/aplicar_migracoes.py
+```
+
+Rodar API:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+API:
+
+```text
+http://localhost:8000
 ```
 
 ## Testes
 
+Frontend:
+
 ```bash
 npm run test
-```
-
-## Build
-
-```bash
 npm run build
 ```
 
-O build executa o versionador de assets automaticamente.
-
-## Variáveis
-
-Crie um arquivo `.env` baseado em `.env.example`.
+Backend:
 
 ```bash
-VITE_SUPABASE_URL=
-VITE_SUPABASE_ANON_KEY=
+cd backend
+pytest
 ```
-
-## Escopo MVP
-
-- 2 barbeiros.
-- Cliente escolhe barbeiro.
-- Serviços com preço e duração.
-- Agendamento pendente.
-- Admin aceita/cancela/conclui.
-- Cliente cancela/remarca por token.
-- WhatsApp manual.
-- Google Calendar ao aceitar.
-- Backup documentado.
 
 ## Deploy
 
 Frontend:
-- Netlify
 
-Banco/funções:
-- Supabase
+- Netlify.
+- Build: `npm run build`.
+- Publish: `dist`.
+
+Backend:
+
+- Render.
+- Build: `pip install -r requirements.txt`.
+- Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+
+## Variáveis Render
+
+```text
+DATABASE_URL=
+ADMIN_TOKEN=
+ORIGENS_CORS=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REFRESH_TOKEN=
+GOOGLE_CALENDAR_ID=primary
+```
+
+## Observação
+
+Google Calendar funciona em modo simulado enquanto as credenciais não forem configuradas.

@@ -21,7 +21,6 @@ Arquiteto de Software Sênior em ambiente Anti-Vibe Coding. A IA atua dentro da 
 - FASE 4 (Verify & Commit): Realize validação contínua (UAT). Cada tarefa atômica deve receber um commit próprio (Caveman Commit: <=50 chars, imperativo, focando no porquê).
 
 4. A LEI DA ENTREGA 100%, MCP E CONTEXTO
-
 - DOCUMENTAÇÃO ATUALIZADA (CONTEXT7): A sua memória de treinamento está obsoleta. Sempre que a tarefa envolver bibliotecas, frameworks (React, Tailwind, etc.) ou APIs externas, acione OBRIGATORIAMENTE as ferramentas do MCP Context7 (`resolve-library-id` e `get-library-docs`) para ler a documentação atualizada ANTES de planejar ou escrever qualquer código.
 - A LEI DA ARQUITETURA (GRAPHIFY): Para evitar "Context Rot", a regra é absoluta: Antes de investigar arquivos isolados ou tatear no escuro, verifique SEMPRE a existência do arquivo `graphify-out/GRAPH_REPORT.md`. Se existir, leia-o passivamente. Ele contém os 'God nodes', dependências e as justificativas estruturais do código, e deve ser usado como seu mapa mental principal [1].
 - EXPLORAÇÃO CIRÚRGICA VIA MCP: Caso precise de detalhes granulares além do grafo, USE as ferramentas do MCP Filesystem (`list_directory`, `search_files`, `read_text_file`). NUNCA peça para o usuário colar arquivos inteiros se não for estritamente necessário. Em vez disso, leia-os de forma autônoma ou instrua a execução de comandos precisos no terminal local [2].

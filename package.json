@@ -1,33 +1,13 @@
 {
-  "name": "barberflow",
+  "name": "barberflow-neon",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Sistema de agendamentos para barbearias usado como projeto de portfolio.",
+  "description": "Sistema de agendamentos para barbearias com HTML, CSS, JavaScript, Python e Neon Postgres.",
   "scripts": {
-    "dev": "vite",
-    "build": "echo \"VITE_SUPABASE_URL: $VITE_SUPABASE_URL\" && echo \"VITE_SUPABASE_ANON_KEY: $VITE_SUPABASE_ANON_KEY\" && vite build && node versionamento/versionador.js",
-    "preview": "vite preview",
-    "test": "vitest run"
+    "dev": "node scripts/build-frontend.js && node scripts/servidor-estatico.js",
+    "build": "node scripts/build-frontend.js && node versionamento/versionador.js",
+    "test": "node --test frontend/assets/js/*.test.js"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.48.1",
-    "date-fns": "^4.1.0",
-    "lucide-react": "^0.468.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.10.1",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.49",
-    "tailwindcss": "^3.4.16",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.3",
-    "vitest": "^2.1.8"
-  }
+  "devDependencies": {}
 }
