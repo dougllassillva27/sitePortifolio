@@ -8,7 +8,23 @@ export const supabaseConfigurado = Boolean(import.meta.env.VITE_SUPABASE_URL && 
 const supabaseUrl = supabaseUrlRaw.trim();
 const supabaseAnonKey = supabaseAnonKeyRaw.trim();
 
-console.log('supabaseUrl no build:', supabaseUrl);
-console.log('supabaseAnonKey no build:', supabaseAnonKey);
+console.log('supabaseUrl RAW no build:', supabaseUrlRaw);
+console.log('supabaseAnonKey RAW no build:', supabaseAnonKeyRaw);
+console.log('supabaseUrl TRIMMED no build:', supabaseUrl);
+console.log('supabaseAnonKey TRIMMED no build:', supabaseAnonKey);
+
+// Debug mais aprofundado para caracteres invisíveis
+console.log(
+  'supabaseUrl HEX:',
+  Array.from(supabaseUrl)
+    .map((c) => c.charCodeAt(0).toString(16))
+    .join(' ')
+);
+console.log(
+  'supabaseAnonKey HEX:',
+  Array.from(supabaseAnonKey)
+    .map((c) => c.charCodeAt(0).toString(16))
+    .join(' ')
+);
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
